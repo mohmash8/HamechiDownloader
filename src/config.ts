@@ -1,4 +1,4 @@
-import 'dotenv/config';
+
 
 function required(name: string): string {
   const v = process.env[name];
