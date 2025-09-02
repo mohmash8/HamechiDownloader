@@ -29,9 +29,13 @@ fastify.post(`/${secret}/telegram`, async (request, reply) => {
 });
 
 async function ensureSchema() {
-  // minimal ensure: run a safe query; schema should be applied via schema.sql
-  await pool.query('select 1');
+  try {
+    await pool.query('select 1');
+  } catch (e: any) {
+    throw new Error('DB connection failed: ' + e?.message);
+  }
 }
+
 
 async function main() {
   // Ensure DB connection
