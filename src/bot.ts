@@ -1,14 +1,14 @@
 import { Telegraf, Context } from 'telegraf';
 import { CONFIG } from './config.js';
-import { upsertUser, isBanned, checkCooldown, recordCooldown, getUsageToday, incrementUsage } from './db.js';
+import { upsertUser, checkCooldown, touchCooldown, getUsageToday, incUsage } from './db.js';
 import axios from 'axios';
 import { PassThrough } from 'stream';
 
 export function createBot() {
   const bot = new Telegraf(CONFIG.botToken);
 
-  bot.start((ctx: Context) => ctx.reply('سلام! لینک بده، من برات به صورت قانونی متادیتا/دانلود مستقیم مجاز رو og می‌کنم. 😎'));
-  bot.help((ctx: Context) => ctx.reply('فقط لینک بده. HTTP مستقیم دانلود می‌شه، پلتفرم‌ها فعلاً متادیتا.'));
+  bot.start((ctx: Context) => ctx.reply('سلام! لینک بده، من برات به صورت قانونی دانلود مستقیم مجاز رو og می‌کنم. 😎'));
+  bot.help((ctx: Context) => ctx.reply('فقط لینک بده. HTTP مستقیم دانلود می‌شه.'));
 
   bot.on('text', async (ctx: Context) => {
     const chatId = ctx.chat?.id; if (!chatId) return;
@@ -19,19 +19,18 @@ export function createBot() {
     if (!m) return ctx.reply('یه لینک بده ✌️');
     const url = m[0];
 
-    if (await isBanned(tgId)) return ctx.reply('اکانت شما بن است.');
+    // cooldown
+    if (!(await checkCooldown(tgId, CONFIG.cooldownSeconds))) return ctx.reply('یه کم صبر کن، کول‌داون فعاله ⏳');
+    await touchCooldown(tgId);
 
-    const okCool = await checkCooldown(tgId, CONFIG.cooldownSeconds);
-    if (!okCool) return ctx.reply('یه کم صبر کن، کول‌داون فعاله ⏳');
-    await recordCooldown(tgId);
-
+    // quota
     const used = await getUsageToday(tgId);
-    if (used >= CONFIG.dailyQuota) return ctx.reply('سهمیهٔ امروزت تموم شد 😅 فردا دوباره بیا.');
-    await incrementUsage(tgId);
+    if (used >= CONFIG.dailyQuota) return ctx.reply('سهمیهٔ امروزت تموم شد 😅');
+    await incUsage(tgId);
 
     await upsertUser(tgId, username || undefined);
 
-    // Direct HTTP(S) download (legal)
+    // simple legal HTTP(S) download
     try {
       const head = await axios.head(url, { validateStatus: () => true });
       if (head.status >= 400) return ctx.reply(`URL در دسترس نیست (${head.status})`);
@@ -40,8 +39,8 @@ export function createBot() {
       const res = await axios.get(url, { responseType: 'stream' });
       const stream = new PassThrough();
       res.data.pipe(stream);
-      const filename = url.split('/').pop() || 'file';
-      await ctx.replyWithDocument({ source: stream, filename });
+      const nameFromUrl = url.split('/').pop() || 'file';
+      await ctx.replyWithDocument({ source: stream, filename: nameFromUrl });
     } catch (e) {
       await ctx.reply('دانلود نشد 😕');
     }

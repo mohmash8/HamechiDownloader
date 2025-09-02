@@ -37,17 +37,22 @@ async function ensureSchema() {
 async function main() {
   await ensureSchema();
 
-  const webhookUrl = `${CONFIG.baseUrl}/${secret}/telegram`;
-  try {
-    await bot.telegram.setWebhook(webhookUrl);
-  } catch (e: any) {
-    fastify.log.error({ err: e?.message }, 'setWebhook failed');
-    throw e;
-  }
-
+  // start HTTP first
   const port = Number(process.env.PORT || 3000);
   await fastify.listen({ port, host: '0.0.0.0' });
   fastify.log.info('HTTP server up');
+
+  // then set webhook; fallback to long-polling if it fails
+  const webhookUrl = `${CONFIG.baseUrl}/${secret}/telegram`;
+  try {
+    await bot.telegram.setWebhook(webhookUrl);
+    fastify.log.info({ webhookUrl }, 'Webhook set');
+  } catch (e: any) {
+    fastify.log.error({ err: e?.message, webhookUrl }, 'setWebhook failed → fallback to long-polling');
+    await bot.telegram.deleteWebhook();
+    await bot.launch();
+    fastify.log.warn('Long-polling launched');
+  }
 }
 
 main().catch((e: any) => {
