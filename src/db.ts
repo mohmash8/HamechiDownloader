@@ -2,7 +2,11 @@ import pkg from 'pg';
 const { Pool } = pkg;
 import { CONFIG } from './config.js';
 
-export const pool = new Pool({ connectionString: CONFIG.dbUrl });
+export const pool = new Pool({
+  connectionString: CONFIG.dbUrl,
+  ssl: { rejectUnauthorized: false }
+});
+
 
 export async function upsertUser(tgId: number, username?: string) {
   const q = `insert into users (tg_id, username)
