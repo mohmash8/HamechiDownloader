@@ -42,9 +42,14 @@ async function main() {
   await ensureSchema();
 
   // Set webhook
-  const webhookUrl = `${CONFIG.baseUrl}/${secret}/telegram`;
+const webhookUrl = `${CONFIG.baseUrl}/${secret}/telegram`;
+try {
   await bot.telegram.setWebhook(webhookUrl);
-  logger.info({ webhookUrl }, 'Webhook set');
+} catch (e: any) {
+  logger.error({ err: e?.message }, 'setWebhook failed');
+  throw e;
+}
+
 
   // Start worker
   startWorker();
