@@ -3,7 +3,7 @@ import { upsertUser, insertJob } from './db.js';
 import { ensureCooldown } from './services/cooldown.js';
 import { checkAndConsumeQuota } from './services/quota.js';
 import { pickProvider } from './providers/index.js';
-import { queue } from './queue.js';
+import { addJob } from './queue.js';
 import { CONFIG } from './config.js';
 
 function extractUrl(text: string): string | null {
@@ -49,7 +49,7 @@ export function registerBotHandlers(bot: any) {
     if (!p) return ctx.reply('فعلاً این لینک پشتیبانی نمی‌شود ❌');
 
     const jobId = await insertJob(userId, url, p.name);
-    await queue.add('download', { chatId, url, provider: p.name, jobId });
+    await addJob({ chatId, url, provider: p.name, jobId });
 
     await ctx.reply(`اوکی ✅ صف پردازش: ${p.name} | باقی‌مونده امروز: ${quota.remaining}`);
   });

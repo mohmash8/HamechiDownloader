@@ -4,7 +4,7 @@ import axios from '@fastify/axios';
 import { PassThrough } from 'stream';
 import { URL } from 'url';
 
-/** Direct HTTP(s) file download if allowed host + size checks. */
+/** Direct HTTP(s) file download if host allowed (if allowedHosts empty → allow all). */
 export class HttpProvider implements Provider {
   match(urlStr: string) {
     try { new URL(urlStr); return /^https?:\/\//i.test(urlStr); } catch { return false; }
@@ -28,6 +28,7 @@ export class HttpProvider implements Provider {
     const res = await axios.get(urlStr, { responseType: 'stream' });
     const stream = new PassThrough();
     res.data.pipe(stream);
+
     const disp = head.headers['content-disposition'] as string | undefined;
     let filename = 'file';
     if (disp) {
