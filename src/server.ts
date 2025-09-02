@@ -59,7 +59,7 @@ try {
   logger.info('HTTP server up');
 }
 
-main().catch((e) => {
-  fastify.log.error(e, 'fatal');
+main().catch((e: any) => {
+  fastify.log.error({ err: e?.message || e, stack: e?.stack }, 'fatal');
   process.exit(1);
 });
