@@ -13,7 +13,7 @@ export const CONFIG = {
   webhookSecret: required('TELEGRAM_WEBHOOK_SECRET'),
   cooldownSeconds: parseInt(process.env.COOLDOWN_SECONDS || '20', 10),
   dailyQuota: parseInt(process.env.DAILY_QUOTA || '50', 10),
-  adminIds: (process.env.ADMIN_IDS || '').split(',').map(s=>s.trim()).filter(Boolean).map(Number),
+  adminIds: (process.env.ADMIN_IDS || '').split(',').map((s: string)=>s.trim()).filter(Boolean).map(Number),
   redisUrl: process.env.REDIS_URL || '',
   maxFileMB: 1900,
   allowedHosts: [] as string[]

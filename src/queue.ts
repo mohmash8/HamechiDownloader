@@ -14,11 +14,11 @@ export function startWorker() {
   if (CONFIG.redisUrl && Bull) {
     const { Queue, Worker } = Bull;
     const queue = new Queue<DownloadJob>('downloads', {
-      connection: { url: CONFIG.redisUrl },
+      connection: { } as any,
       defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 2000 } }
     });
     addJob = async (j) => { await queue.add('download', j); };
-    const worker = new Worker<DownloadJob>('downloads', async (job) => run(job.data), { connection: { url: CONFIG.redisUrl }, concurrency: 3 });
+    const worker = new Worker<DownloadJob>('downloads', async (job) => run(job.data), { connection: { } as any, concurrency: 3 });
     worker.on('completed', (job) => logger.info({ jobId: job.id }, 'job completed'));
     worker.on('failed', (job, err) => logger.error({ jobId: job?.id, err }, 'job failed'));
     logger.info('Worker (BullMQ) started');

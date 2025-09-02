@@ -16,7 +16,7 @@ export function registerBotHandlers(bot: any) {
   bot.help((ctx: Context) => ctx.reply('فقط لینک بده. HTTP مستقیم دانلود می‌شه، پلتفرم‌ها (YT/IG/SC/TT) فعلاً متادیتا.'));
 
   bot.on('text', async (ctx: Context) => {
-    const chatId = ctx.chat.id;
+    const chatId = ctx.chat?.id; if (!chatId) return;
     const tgId = ctx.from?.id!;
     const username = ctx.from?.username;
     const url = extractUrl((ctx.message as any).text || '');
@@ -65,7 +65,7 @@ export function registerBotHandlers(bot: any) {
     if (!CONFIG.adminIds.includes(tgId)) return;
     const text = (ctx.message as any).text.replace('/ads_add','').trim();
     if (!text) return ctx.reply('ads_add <text> [| <url>]');
-    const [t, u] = text.split('|').map(s => s.trim());
+    const [t, u] = text.split('|').map((s: string) => s.trim());
     await addAd(t, u || undefined);
     ctx.reply('تبلیغ اضافه شد ✅');
   });

@@ -1,6 +1,5 @@
 import { Provider, ProcessResult } from './Provider.js';
 import { fetchOEmbed } from './oembed.js';
-import { URL } from 'url';
 
 /** Metadata‑only (legal). */
 export class YouTubeProvider implements Provider {

@@ -2,7 +2,6 @@ import { Provider, ProcessResult } from './Provider.js';
 import { CONFIG } from '../config.js';
 import axios from 'axios';
 import { PassThrough } from 'stream';
-import { URL } from 'url';
 
 /** Direct HTTP(s) file download if allowed (allowedHosts empty → allow all). */
 export class HttpProvider implements Provider {
