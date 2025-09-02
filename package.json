@@ -1,0 +1,23 @@
+{
+  "name": "tg-bot-railway-autoschema-v2",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "axios": "1.7.7",
+    "fastify": "4.28.1",
+    "@fastify/formbody": "8.0.1",
+    "pg": "8.11.5",
+    "telegraf": "4.16.3",
+    "pino": "9.4.0"
+  },
+  "devDependencies": {
+    "typescript": "5.4.5",
+    "@types/node": "20.14.9",
+    "@types/pg": "8.10.2"
+  }
+}
